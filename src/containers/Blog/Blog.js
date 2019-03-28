@@ -1,58 +1,52 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import Post from '../../components/Post/Post';
+import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import './Blog.css';
+import Posts from './Posts/Posts';
+//import NewPost from './NewPost/NewPost';
+import asyncComponent from './../../HOC/asyncComponent';
 
+const asycNewPost = asyncComponent(() => {
+  return import('./NewPost/NewPost');
+});
 class Blog extends Component {
   state = {
-    posts: [],
-    selectedPost: null
-  };
-  async componentDidMount() {
-    try {
-      let { data } = await axios.get(
-        'https://jsonplaceholder.typicode.com/posts'
-      );
-      data = data.slice(0, 4).map(i => {
-        return { ...i, author: 'Max' };
-      });
-
-      this.setState({ posts: data });
-    } catch (ex) {
-      console.log(ex);
-    }
-  }
-  postSelectorHandler = id => {
-    console.log(id);
-    this.setState({ selectedPost: id });
+    auth: true
   };
   render() {
-    const post = this.state.posts.map(post => {
-      return (
-        <Post
-          key={post.id}
-          title={post.title}
-          author={post.author}
-          clicked={() => this.postSelectorHandler(post.id)}
-        />
-      );
-    });
-
     return (
       <div>
         <header className="Blog">
           <nav>
             <ul>
               <li>
-                <a href="/">Home</a>
+                <NavLink to="/posts" exact activeClassName="my-active">
+                  Home
+                </NavLink>
+                {/* when you add NavLink the class active is added automatically activeClassName id for overriding thr class name  */}
               </li>
               <li>
-                <a href="/new-post">New Post</a>
+                <NavLink
+                  to={{
+                    pathname: '/new-post',
+                    hash: '#submit',
+                    search: '?quick-submit:true'
+                  }}
+                >
+                  New Post
+                </NavLink>
               </li>
             </ul>
           </nav>
         </header>
-        <section className="Posts">{post}</section>
+        {/* <Route path="/" exact render={() => <Posts />} /> */}
+        <Switch>
+          {this.state.auth ? (
+            <Route path="/new-post" exact component={asycNewPost} />
+          ) : null}
+          <Route path="/posts" component={Posts} />
+          <Redirect from="/" to="/posts" />
+          {/* <Route path="/" component={Posts} /> */}
+        </Switch>
         {/* <section>
           <FullPost id={this.state.selectedPost} />
         </section>

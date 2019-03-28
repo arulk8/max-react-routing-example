@@ -7,25 +7,32 @@ class FullPost extends Component {
   state = {
     loadedPost: null
   };
-  async componentDidUpdate() {
-    console.log(this.state.loadedPost);
+  loadData = async () => {
     let post;
-    if (this.props.id !== null) {
+    if (this.props.match.params.id !== null) {
       if (
         !this.state.loadedPost ||
-        (this.state.loadedPost && this.state.loadedPost.id !== this.props.id)
+        (this.state.loadedPost &&
+          this.state.loadedPost.id !== +this.props.match.params.id)
       ) {
         post = await Axios.get(
-          'https://jsonplaceholder.typicode.com/posts/' + this.props.id
+          'https://jsonplaceholder.typicode.com/posts/' +
+            this.props.match.params.id
         );
 
         this.setState({ loadedPost: post.data });
       }
     }
+  };
+  componentDidUpdate() {
+    this.loadData();
+  }
+  componentDidMount() {
+    this.loadData();
   }
   render() {
     let post = <p style={{ textAlign: 'center' }}>Please select a Post!</p>;
-    if (this.props.id === null) {
+    if (this.props.match.params.id === null) {
       return post;
     }
     if (this.state.loadedPost === null) {
