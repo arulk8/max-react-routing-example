@@ -4,3 +4,79 @@ How to use the downloaded files
 2) Run "npm start" to view the project
 
 Compare my code to yours to solve issues you might encounter. You may also copy the content of src/ into your own project's src/ folder to use your project setup (which might've been created with a different create-react-app version) and still use my code.
+
+
+-----------------------------------react.lazy for 16.6.0-----------------------------------------
+import React, { Component, Suspense } from 'react';
+import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
+import './Blog.css';
+//import Posts from './Posts/Posts';
+//import NewPost from './NewPost/NewPost';
+import asyncComponent from './../../HOC/asyncComponent';
+
+const asycNewPost = asyncComponent(() => {
+  return import('./NewPost/NewPost');
+});
+
+const Posts = React.lazy(() => {
+  // lazy loading
+  return import('./Posts/Posts');
+});
+class Blog extends Component {
+  state = {
+    auth: true
+  };
+  render() {
+    return (
+      <div>
+        <header className="Blog">
+          <nav>
+            <ul>
+              <li>
+                <NavLink to="/posts" exact activeClassName="my-active">
+                  Home
+                </NavLink>
+                {/* when you add NavLink the class active is added automatically activeClassName id for overriding thr class name  */}
+              </li>
+              <li>
+                <NavLink
+                  to={{
+                    pathname: '/new-post',
+                    hash: '#submit',
+                    search: '?quick-submit:true'
+                  }}
+                >
+                  New Post
+                </NavLink>
+              </li>
+            </ul>
+          </nav>
+        </header>
+        {/* <Route path="/" exact render={() => <Posts />} /> */}
+        <Switch>
+          {this.state.auth ? (
+            <Route path="/new-post" exact component={asycNewPost} />
+          ) : null}
+          <Route
+            path="/posts"
+            render={() => (
+              <Suspense fallback={<div>loading...</div>}>
+                <Posts />
+              </Suspense>
+            )}
+          />
+          {/* <Redirect from="/" to="/posts" /> */}
+          {/* <Route path="/" component={Posts} /> */}
+        </Switch>
+        {/* <section>
+          <FullPost id={this.state.selectedPost} />
+        </section>
+        <section>
+          <NewPost />
+        </section> */}
+      </div>
+    );
+  }
+}
+
+export default Blog;
